@@ -11,8 +11,17 @@ app.get('/', function(req, res) {
   res.send('init');
 });
 
-app.get('/:event/:value1?/:value2?/:value3?', function(req, res) {
-  var iftttUrl = 'https://maker.ifttt.com/trigger/' + req.params.event + '/with/key/' + API_KEY + '?value1=' + (req.params.value1 || '') + '&value2=' + (req.params.value2 || '') + '&value3=' + (req.params.value3 || '');
+var map = {
+  default: 'bozeXoDhGzNfn-w5bnRhcL'
+};
+
+app.get('/init/:name/:api', function(req, res) {
+  map[req.params.name] = req.params.api;
+  res.send('initialized succefully');
+})
+
+app.get(':name/:event/:value1?/:value2?/:value3?', function(req, res) {
+  var iftttUrl = 'https://maker.ifttt.com/trigger/' + req.params.event + '/with/key/' + map[req.params.name] + '?value1=' + (req.params.value1 || '') + '&value2=' + (req.params.value2 || '') + '&value3=' + (req.params.value3 || '');
   console.log(iftttUrl);
   request(iftttUrl, function(error, response, body) {
     if (!error && response.statusCode == 200) {
