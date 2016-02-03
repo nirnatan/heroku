@@ -22,16 +22,8 @@ app.get('/init/:name/:api', function(req, res) {
 });
 
 app.get('/run/:name/:event', function(req, res) {
-  var queries = _.reduce(req.query, function(acc, value, key) {
-    return acc.concat(key, '=', value);
-  }, '');
-
   var iftttUrl = 'https://maker.ifttt.com/trigger/' + req.params.event + '/with/key/' + map[req.params.name];
-  if (!_.isEmpty(queries)) {
-    iftttUrl += '?' + queries;
-  }
-
-  request(iftttUrl, function(error, response, body) {
+  request.post({url: iftttUrl, form: req.query}, function(error, response, body) {
     res.send(body);
   });
 });
