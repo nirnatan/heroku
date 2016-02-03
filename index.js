@@ -1,6 +1,7 @@
 var express = require('express');
 var request = require('request');
 var cors = require('cors');
+var _ = require('lodash');
 var API_KEY = 'bozeXoDhGzNfn-w5bnRhcL';
 var app = express();
 
@@ -12,21 +13,26 @@ app.get('/', function(req, res) {
 });
 
 var map = {
-  default: 'bozeXoDhGzNfn-w5bnRhcL'
+  default: API_KEY
 };
 
 app.get('/init/:name/:api', function(req, res) {
   map[req.params.name] = req.params.api;
   res.send('initialized succefully');
-})
+});
 
-app.get('/run/:name/:event/:value1?/:value2?/:value3?', function(req, res) {
-  var iftttUrl = 'https://maker.ifttt.com/trigger/' + req.params.event + '/with/key/' + map[req.params.name] + '?value1=' + (req.params.value1 || '') + '&value2=' + (req.params.value2 || '') + '&value3=' + (req.params.value3 || '');
-  console.log(iftttUrl);
+app.get('/run/:name/:event', function(req, res) {
+  var queries = _.reduce(req.query, function(acc, value, key) {
+    return acc.concat(key, '=', value);
+  }, '');
+
+  var iftttUrl = 'https://maker.ifttt.com/trigger/' + req.params.event + '/with/key/' + map[req.params.name];
+  if (!_.isEmpty(queries)) {
+    iftttUrl += '?' + queries;
+  }
+
   request(iftttUrl, function(error, response, body) {
-    if (!error && response.statusCode == 200) {
-      res.send(body);
-    }
+    res.send(body);
   });
 });
 
